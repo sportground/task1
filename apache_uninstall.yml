@@ -1,0 +1,34 @@
+---
+- name: playbook_apache_uninstall
+  hosts: webservers
+  user: ansible
+  become: yes
+  become_method: sudo
+  become_user: root
+
+  tasks:
+  - name: remove apache
+    yum:
+      name: httpd
+      state: absent
+  - name: delete index test page
+    file:
+      state: absent
+      path: "/var/www/html/index.html"  
+
+  - name: disable port
+    firewalld:
+      port: 80
+      permanent: yes
+      state: disabled 
+
+  - name: disable port
+    firewalld:
+      port: 443
+      permanent: yes
+      state: disabled
+
+  - name: service reload
+    systemd:
+      name: firewalld
+      state: reloaded

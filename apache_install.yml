@@ -1,0 +1,44 @@
+---
+- name: playbook_apache_install
+  hosts: webservers
+  user: ansible
+  become: yes
+  become_method: sudo
+  become_user: root
+
+  tasks:
+  - name: ensure apache is at the latest version
+    yum:
+      name: httpd
+      state: latest
+  - name: copy index test page
+    template:
+      src: "files/index.html.j2"
+      dest: "/var/www/html/index.html"  
+
+  - name: ensure apache is running
+    service:
+      name: httpd
+      state: started
+  handlers:
+  - name: restart apache
+    service:
+      name: httpd
+      state: restarted
+
+  - name: add port to firewalld
+    firewalld:
+      port: 80
+      permanent: yes
+      state: enabled
+
+  - name: add port to firewalld
+    firewalld:
+      port: 443
+      permanent: yes
+      state: enabled
+
+  - name: service reload
+    systemd:
+      name: firewalld
+      state: reloaded
